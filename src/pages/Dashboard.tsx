@@ -143,7 +143,7 @@ export default function Dashboard() {
         </div>
         <div className="h-12">
           <img 
-            src="/lovable-uploads/02026d8a-4f46-4e14-9482-d70a6e237e77.png" 
+            src={`${import.meta.env.BASE_URL}assets/zime-logo.png`}
             alt="Zime logo" 
             className="h-full object-contain" 
           />
