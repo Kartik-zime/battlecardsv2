@@ -13,19 +13,23 @@ import {
   transformToProductData,
   transformToProductScatterData,
   transformToStageData,
+  transformToTagData,
   type StageData
 } from "@/services/api";
 import FilterBar from "@/components/dashboard/FilterBar";
 import CompetitorTable from "@/components/dashboard/CompetitorTable";
 import ScatterChart from "@/components/dashboard/ScatterChart";
 import { StageTable } from "@/components/dashboard/StageTable";
-import StageBarChart from "@/components/dashboard/StageBarChart";
+import StageScatterPlot from "@/components/dashboard/StageScatterPlot";
 import ProductDiscussionTable from "@/components/dashboard/ProductDiscussionTable";
 import ProductDiscussionScatter from "@/components/dashboard/ProductDiscussionScatter";
 import RepTable from "@/components/dashboard/RepTable";
 import ObjectionCategoryTable from "@/components/dashboard/ObjectionCategoryTable";
 import { StageScatter } from "@/components/dashboard/StageScatter";
 import { ObjectionWordCloud } from "@/components/dashboard/ObjectionWordCloud";
+import TagPieChart from "@/components/dashboard/TagPieChart";
+import RawDealsTable from "@/components/dashboard/RawDealsTable";
+import ExplainerCard from "@/components/dashboard/ExplainerCard";
 
 export default function Dashboard() {
   // Set default date range from Jan 1, 2024 to current date
@@ -50,7 +54,7 @@ export default function Dashboard() {
     stageBeforeLost: ["All"],
   });
 
-  const [rawData, setRawData] = useState([]);
+  const [battlecardData, setBattlecardData] = useState([]);
   const [competitorData, setCompetitorData] = useState([]);
   const [scatterData, setScatterData] = useState([]);
   const [repData, setRepData] = useState([]);
@@ -61,12 +65,15 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [stageData, setStageData] = useState<StageData[]>([]);
 
+  // Store filtered data for use in child components
+  const [filteredData, setFilteredData] = useState([]);
+
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
         const battlecardData = await fetchBattlecardData();
-        setRawData(battlecardData);
+        setBattlecardData(battlecardData);
         
         // Get distinct values for filters
         const distinctValues = getDistinctValues(battlecardData);
@@ -97,17 +104,18 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (rawData.length > 0) {
-      const filteredData = filterData(rawData, filters);
-      setCompetitorData(transformToCompetitorData(filteredData));
-      setScatterData(transformToScatterData(filteredData));
-      setRepData(transformToRepData(filteredData));
-      setObjectionData(transformToObjectionData(filteredData));
-      setProductData(transformToProductData(filteredData));
-      setProductScatterData(transformToProductScatterData(filteredData));
-      setStageData(transformToStageData(filteredData));
+    if (battlecardData.length > 0) {
+      const filtered = filterData(battlecardData, filters);
+      setFilteredData(filtered);
+      setCompetitorData(transformToCompetitorData(filtered));
+      setScatterData(transformToScatterData(filtered));
+      setRepData(transformToRepData(filtered));
+      setObjectionData(transformToObjectionData(filtered));
+      setProductData(transformToProductData(filtered));
+      setProductScatterData(transformToProductScatterData(filtered));
+      setStageData(transformToStageData(filtered));
     }
-  }, [rawData, filters]);
+  }, [battlecardData, filters]);
 
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
@@ -136,9 +144,9 @@ export default function Dashboard() {
     <div className="container mx-auto px-4 py-8 max-w-[1600px]">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Competitor Battlecards</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Competitive Win-Loss Analysis</h1>
           <p className="text-gray-500">
-            Review competitor performance and win rates across your product lines
+            Track competitor presence, win rates, top objections, and sales performance to uncover revenue opportunities and risks.
           </p>
         </div>
         <div className="h-12">
@@ -156,37 +164,56 @@ export default function Dashboard() {
         onFilterChange={handleFilterChange} 
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
-          <CompetitorTable data={competitorData} />
-        </div>
-        <div className="lg:col-span-1">
-          <ScatterChart data={scatterData} />
-        </div>
+      <ExplainerCard
+        title="Top Challengers in the Pipeline"
+        insight="See which competitors show up most frequently in deals and how effectively we convert against them."
+      />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
+        <CompetitorTable data={competitorData} />
+        <ScatterChart data={scatterData} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
-          <ProductDiscussionTable data={productData} />
-        </div>
-        <div className="lg:col-span-1">
-          <ProductDiscussionScatter data={productScatterData} />
-        </div>
-      </div>
-
+      <ExplainerCard
+        title="Conversion Patterns Across the Funnel"
+        insight="Understand where in the sales journey we win or lose competitive deals to improve stage-specific strategy."
+      />
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
         <StageTable data={stageData} />
-        <StageScatter data={stageData} />
+        <StageScatterPlot data={stageData} />
       </div>
 
+      <ExplainerCard
+        title="Why We Lose to Competitors"
+        insight="Identify the most common reasons for lost deals to strengthen our positioning, messaging, and product roadmap."
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <ObjectionCategoryTable data={objectionData} />
         <ObjectionWordCloud data={objectionData} />
       </div>
 
+      <ExplainerCard
+        title="Competitor Positioning with Prospect"
+        insight="Assess how well competitors are known or adopted with our prospect to plan for displacement vs greenfield tactics."
+      />
+      <div className="grid grid-cols-1 gap-6 mb-8">
+        <TagPieChart data={transformToTagData(filteredData)} />
+      </div>
+
+      <ExplainerCard
+        title="Rep Performance in Competitive Deals"
+        insight="Highlight which reps win despite objections and where coaching is needed to improve competitive outcomes."
+      />
       <div className="grid grid-cols-1 gap-6">
         <RepTable data={repData} />
       </div>
+
+      <div className="mt-8">
+        <ExplainerCard
+          title="Deal-Level Drill-Down: Calls, Stages & Outcomes"
+          insight="Deep dive into individual competitive deals to review call outcomes, deal stages, and key objections raised by prospects."
+        />
+      </div>
+      <RawDealsTable data={filteredData} />
     </div>
   );
 }

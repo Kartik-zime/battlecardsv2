@@ -21,12 +21,12 @@ export interface FilterOptions {
 }
 
 export interface StageData {
-  stage: number;
+  stage: string;
   movedToClosedDeals: number;
   losses: number;
   wins: number;
   winRate: number;
-  topObjections: number;
+  topObjections: string[];
 }
 
 export interface ProductDiscussion {

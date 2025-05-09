@@ -52,6 +52,7 @@ interface BattlecardResponse {
   funnel_by_product: string;
   previous_deal_stage: string;
   heading: string;
+  tag: string;
 }
 
 interface CompetitorStats {
@@ -491,4 +492,37 @@ export function transformToStageData(data: BattlecardResponse[]): StageData[] {
       topObjections: sortedObjections
     };
   });
+}
+
+export interface TagData {
+  name: string;
+  value: number;
+}
+
+export function transformToTagData(data: BattlecardResponse[]): TagData[] {
+  const tagMap = new Map<string, number>();
+  const totalCallLinks = new Set<string>();
+
+  // Count total distinct call_links
+  data.forEach(item => {
+    if (item.deal_id) {
+      totalCallLinks.add(item.deal_id);
+    }
+  });
+
+  // Count tag occurrences
+  data.forEach(item => {
+    if (item.tag) {
+      const currentCount = tagMap.get(item.tag) || 0;
+      tagMap.set(item.tag, currentCount + 1);
+    }
+  });
+
+  // Convert to array and calculate percentages
+  return Array.from(tagMap.entries())
+    .map(([name, count]) => ({
+      name,
+      value: Math.round((count / totalCallLinks.size) * 100)
+    }))
+    .sort((a, b) => b.value - a.value); // Sort by value in descending order
 } 
