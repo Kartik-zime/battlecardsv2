@@ -174,6 +174,15 @@ export default function Dashboard() {
       </div>
 
       <ExplainerCard
+        title="Products Most Frequently Targeted"
+        insight="Identify which of our product lines face the most competitive pressure to prioritize differentiation, enablement, and support."
+      />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
+        <ProductDiscussionTable data={productData} />
+        <ProductDiscussionScatter data={productScatterData} />
+      </div>
+
+      <ExplainerCard
         title="Conversion Patterns Across the Funnel"
         insight="Understand where in the sales journey we win or lose competitive deals to improve stage-specific strategy."
       />
