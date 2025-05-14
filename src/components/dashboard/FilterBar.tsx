@@ -30,6 +30,8 @@ interface FilterBarProps {
     salesStages: string[];
     products: string[];
     objectionCategories: string[];
+    previousDealStages?: string[];
+    dealStages?: string[];
   };
   onFilterChange: (filters: FilterOptions) => void;
 }
@@ -88,8 +90,18 @@ export default function FilterBar({ filters, filterOptions, onFilterChange }: Fi
       options: filterOptions.productLines,
     },
     {
+      key: "previousDealStage",
+      label: "Previous Deal Stage",
+      options: filterOptions.previousDealStages || [],
+    },
+    {
+      key: "dealStage",
+      label: "Current Deal Stage",
+      options: filterOptions.dealStages || [],
+    },
+    {
       key: "salesStage",
-      label: "Deal Stage",
+      label: "Deal Stage (during call)",
       options: filterOptions.salesStages,
     },
     {
@@ -148,61 +160,65 @@ export default function FilterBar({ filters, filterOptions, onFilterChange }: Fi
           </Popover>
         </div>
         {/* Multi-select Filters */}
-        {filterConfigs.map(({ key, label, options }) => (
-          <div className="space-y-2 max-w-[180px]" key={key}>
-            <span className="text-sm font-medium text-gray-700">{label}</span>
-            <div className="relative">
-              <Button
-                variant="outline"
-                className="w-full flex flex-wrap gap-1 min-h-[40px] justify-start items-center text-left font-normal pr-8"
-                onClick={() => setOpenDropdown(openDropdown === key ? null : key)}
-                type="button"
-              >
-                {filters[key][0] === "All" ? (
-                  <span className="text-gray-500">All</span>
-                ) : filters[key].length === 1 ? (
-                  <span>{filters[key][0]}</span>
-                ) : (
-                  <span>{filters[key].length} selected</span>
-                )}
-              </Button>
-              {openDropdown === key && (
-                <div
-                  ref={el => (dropdownRefs.current[key] = el)}
-                  className="absolute left-0 top-full mt-2 z-50 bg-white border rounded shadow-lg p-3 min-w-[200px] max-h-72 overflow-y-auto"
+        {filterConfigs.map(({ key, label, options }) => {
+          // Defensive: fallback to ["All"] if key is missing in filters
+          const filterValue = filters[key] || ["All"];
+          return (
+            <div className="space-y-2 max-w-[180px]" key={key}>
+              <span className="text-sm font-medium text-gray-700">{label}</span>
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  className="w-full flex flex-wrap gap-1 min-h-[40px] justify-start items-center text-left font-normal pr-8"
+                  onClick={() => setOpenDropdown(openDropdown === key ? null : key)}
+                  type="button"
                 >
-                  <div className="mb-2 font-semibold text-gray-700">Select {label}</div>
-                  <div className="flex flex-col gap-1">
-                    {options.map(option => (
-                      <label key={option} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filters[key].includes(option)}
-                          onChange={() => handleMultiSelectChange(key, option)}
-                        />
-                        <span className="truncate" title={option}>{option}</span>
-                      </label>
-                    ))}
-                  </div>
-                  {filters[key][0] !== "All" && (
-                    <button
-                      className="mt-3 px-3 py-1 bg-gray-200 rounded text-xs hover:bg-gray-300"
-                      onClick={e => {
-                        e.stopPropagation();
-                        onFilterChange({
-                          ...filters,
-                          [key]: ["All"],
-                        });
-                      }}
-                    >
-                      Clear Filter
-                    </button>
+                  {filterValue[0] === "All" ? (
+                    <span className="text-gray-500">All</span>
+                  ) : filterValue.length === 1 ? (
+                    <span>{filterValue[0]}</span>
+                  ) : (
+                    <span>{filterValue.length} selected</span>
                   )}
-                </div>
-              )}
+                </Button>
+                {openDropdown === key && (
+                  <div
+                    ref={el => (dropdownRefs.current[key] = el)}
+                    className="absolute left-0 top-full mt-2 z-50 bg-white border rounded shadow-lg p-3 min-w-[200px] max-h-72 overflow-y-auto"
+                  >
+                    <div className="mb-2 font-semibold text-gray-700">Select {label}</div>
+                    <div className="flex flex-col gap-1">
+                      {options.map(option => (
+                        <label key={option} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={filterValue.includes(option)}
+                            onChange={() => handleMultiSelectChange(key, option)}
+                          />
+                          <span className="truncate" title={option}>{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {filterValue[0] !== "All" && (
+                      <button
+                        className="mt-3 px-3 py-1 bg-gray-200 rounded text-xs hover:bg-gray-300"
+                        onClick={e => {
+                          e.stopPropagation();
+                          onFilterChange({
+                            ...filters,
+                            [key]: ["All"],
+                          });
+                        }}
+                      >
+                        Clear Filter
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );

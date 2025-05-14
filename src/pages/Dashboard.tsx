@@ -47,6 +47,8 @@ export default function Dashboard() {
     salesStage: ["All"],
     product: ["All"],
     objectionCategory: ["All"],
+    previousDealStage: ["All"],
+    dealStage: ["All"],
   });
 
   const [filterOptions, setFilterOptions] = useState({
@@ -55,6 +57,8 @@ export default function Dashboard() {
     salesStages: ["All"],
     products: ["All"],
     objectionCategories: ["All"],
+    previousDealStages: ["All"],
+    dealStages: ["All"],
   });
 
   const [battlecardData, setBattlecardData] = useState([]);

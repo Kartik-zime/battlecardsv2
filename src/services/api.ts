@@ -85,6 +85,8 @@ export function getDistinctValues(data: BattlecardResponse[]) {
   const salesStages = new Set<string>(["All"]);
   const products = new Set<string>(["All"]);
   const objectionCategories = new Set<string>(["All"]);
+  const previousDealStages = new Set<string>(["All"]);
+  const dealStages = new Set<string>(["All"]);
 
   data.forEach(item => {
     if (item.funnel_by_product) {
@@ -102,6 +104,12 @@ export function getDistinctValues(data: BattlecardResponse[]) {
     if (item.objection_category) {
       objectionCategories.add(item.objection_category);
     }
+    if (item.previous_deal_stage) {
+      previousDealStages.add(item.previous_deal_stage);
+    }
+    if (item.deal_stage) {
+      dealStages.add(item.deal_stage);
+    }
   });
 
   return {
@@ -110,6 +118,8 @@ export function getDistinctValues(data: BattlecardResponse[]) {
     salesStages: Array.from(salesStages),
     products: Array.from(products),
     objectionCategories: Array.from(objectionCategories),
+    previousDealStages: Array.from(previousDealStages),
+    dealStages: Array.from(dealStages),
   };
 }
 
@@ -123,8 +133,10 @@ export function filterData(data: BattlecardResponse[], filters: FilterOptions) {
     const salesStageMatch = filters.salesStage.includes("All") || filters.salesStage.includes(item.sales_stage);
     const productMatch = filters.product.includes("All") || filters.product.includes(item.heading);
     const objectionCategoryMatch = filters.objectionCategory.includes("All") || filters.objectionCategory.includes(item.objection_category);
+    const previousDealStageMatch = filters.previousDealStage.includes("All") || filters.previousDealStage.includes(item.previous_deal_stage);
+    const dealStageMatch = filters.dealStage.includes("All") || filters.dealStage.includes(item.deal_stage);
 
-    return dateInRange && productLineMatch && competitorMatch && salesStageMatch && productMatch && objectionCategoryMatch;
+    return dateInRange && productLineMatch && competitorMatch && salesStageMatch && productMatch && objectionCategoryMatch && previousDealStageMatch && dealStageMatch;
   });
 }
 
