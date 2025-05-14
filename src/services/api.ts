@@ -71,7 +71,7 @@ interface ProductStats {
   losses: Set<string>;
 }
 
-const API_URL = "https://script.google.com/macros/s/AKfycby358OuE8kTuxszN0B9rjjl_zMFSKpUxBOob_Byi07aXC0Hu2OXhha9qrdk-rctUDeP/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz6z1qUqGyEKh_psloIeBM5HzTk1FWV48kM0y9vva2v6sCrRovWUqi0Bj7-8x6tduQ4/exec";
 
 export async function fetchBattlecardData() {
   const response = await fetch(API_URL);

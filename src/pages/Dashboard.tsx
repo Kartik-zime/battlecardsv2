@@ -147,7 +147,17 @@ export default function Dashboard() {
     <div className="container mx-auto px-4 py-8 max-w-[1600px]">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Competitive Win-Loss Analysis</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            Competitive Win-Loss Analysis
+            <a
+              href="https://docs.google.com/spreadsheets/d/1G66R17QVOiUh4Kw6JiyPC0RgO20XwFh4bqhRLAIjPLs/edit?gid=0#gid=0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-400 font-normal underline ml-2 hover:text-gray-600"
+            >
+              (Raw Data)
+            </a>
+          </h1>
           <p className="text-gray-500">
             Track competitor presence, win rates, top objections, and sales performance to uncover revenue opportunities and risks.
           </p>
@@ -213,7 +223,7 @@ export default function Dashboard() {
       <div className="mt-8">
         <ExplainerCard
           title="What Can We Learn From Specific Deals?"
-          insight="Explore deal-level insights to identify patterns, buyer concerns, and what’s tipping decisions against us."
+          insight="Explore deal-level insights to identify patterns, buyer concerns, and what's tipping decisions against us."
         />
       </div>
       <RawDealsTable data={filteredData} />
