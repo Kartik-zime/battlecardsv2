@@ -82,8 +82,9 @@ export async function fetchBattlecardData() {
 export function getDistinctValues(data: BattlecardResponse[]) {
   const productLines = new Set<string>(["All"]);
   const competitors = new Set<string>(["All"]);
-  const dealStages = new Set<string>(["All"]);
-  const stageBeforeLost = new Set<string>(["All"]);
+  const salesStages = new Set<string>(["All"]);
+  const products = new Set<string>(["All"]);
+  const objectionCategories = new Set<string>(["All"]);
 
   data.forEach(item => {
     if (item.funnel_by_product) {
@@ -92,19 +93,23 @@ export function getDistinctValues(data: BattlecardResponse[]) {
     if (item.Competitor_name) {
       competitors.add(item.Competitor_name);
     }
-    if (item.deal_stage) {
-      dealStages.add(item.deal_stage);
+    if (item.sales_stage) {
+      salesStages.add(item.sales_stage);
     }
-    if (item.previous_deal_stage) {
-      stageBeforeLost.add(item.previous_deal_stage);
+    if (item.heading) {
+      products.add(item.heading);
+    }
+    if (item.objection_category) {
+      objectionCategories.add(item.objection_category);
     }
   });
 
   return {
     productLines: Array.from(productLines),
     competitors: Array.from(competitors),
-    dealStages: Array.from(dealStages),
-    stageBeforeLost: Array.from(stageBeforeLost),
+    salesStages: Array.from(salesStages),
+    products: Array.from(products),
+    objectionCategories: Array.from(objectionCategories),
   };
 }
 
@@ -115,10 +120,11 @@ export function filterData(data: BattlecardResponse[], filters: FilterOptions) {
 
     const productLineMatch = filters.productLine.includes("All") || filters.productLine.includes(item.funnel_by_product);
     const competitorMatch = filters.competitor.includes("All") || filters.competitor.includes(item.Competitor_name);
-    const dealStageMatch = filters.dealStage.includes("All") || filters.dealStage.includes(item.deal_stage);
-    const stageBeforeLostMatch = filters.stageBeforeLost.includes("All") || filters.stageBeforeLost.includes(item.previous_deal_stage);
+    const salesStageMatch = filters.salesStage.includes("All") || filters.salesStage.includes(item.sales_stage);
+    const productMatch = filters.product.includes("All") || filters.product.includes(item.heading);
+    const objectionCategoryMatch = filters.objectionCategory.includes("All") || filters.objectionCategory.includes(item.objection_category);
 
-    return dateInRange && productLineMatch && competitorMatch && dealStageMatch && stageBeforeLostMatch;
+    return dateInRange && productLineMatch && competitorMatch && salesStageMatch && productMatch && objectionCategoryMatch;
   });
 }
 

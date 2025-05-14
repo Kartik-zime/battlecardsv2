@@ -15,8 +15,8 @@ interface RepTableProps {
 }
 
 export default function RepTable({ data }: RepTableProps) {
-  // Sort data by Total Deals in descending order
-  const sortedData = [...data].sort((a, b) => b.totalDeals - a.totalDeals);
+  // Sort data by Losses in descending order
+  const sortedData = [...data].sort((a, b) => b.losses - a.losses);
 
   return (
     <div className="rounded-lg border bg-white shadow">
@@ -35,16 +35,16 @@ export default function RepTable({ data }: RepTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {sortedData.map((item) => (
-              <tr key={item.repName}>
-                <td className="whitespace-nowrap px-4 py-2 text-sm font-semibold text-gray-900">{item.repName}</td>
+            {sortedData.map((item, index) => (
+              <tr key={item.repName} className={index < 5 ? "bg-red-100" : ""}>
+                <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">{item.repName}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-right">{item.totalDeals}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-right">{item.openDeals}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-right">{item.closedDeals}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-right">{item.wins}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-right">{item.losses}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-right">{item.winRate}%</td>
-                <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">{item.topObjections.join(", ")}</td>
+                <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">{item.topObjections && item.topObjections.join(", ")}</td>
               </tr>
             ))}
           </tbody>

@@ -30,6 +30,7 @@ import { ObjectionWordCloud } from "@/components/dashboard/ObjectionWordCloud";
 import TagPieChart from "@/components/dashboard/TagPieChart";
 import RawDealsTable from "@/components/dashboard/RawDealsTable";
 import ExplainerCard from "@/components/dashboard/ExplainerCard";
+import ObjectionHandlingTable from "@/components/dashboard/ObjectionHandlingTable";
 
 export default function Dashboard() {
   // Set default date range from Jan 1, 2024 to current date
@@ -43,15 +44,17 @@ export default function Dashboard() {
     dateRange: defaultDateRange,
     productLine: ["All"],
     competitor: ["All"],
-    dealStage: ["All"],
-    stageBeforeLost: ["All"],
+    salesStage: ["All"],
+    product: ["All"],
+    objectionCategory: ["All"],
   });
 
   const [filterOptions, setFilterOptions] = useState({
     productLines: ["All"],
     competitors: ["All"],
-    dealStages: ["All"],
-    stageBeforeLost: ["All"],
+    salesStages: ["All"],
+    products: ["All"],
+    objectionCategories: ["All"],
   });
 
   const [battlecardData, setBattlecardData] = useState([]);
@@ -165,8 +168,8 @@ export default function Dashboard() {
       />
 
       <ExplainerCard
-        title="Top Challengers in the Pipeline"
-        insight="See which competitors show up most frequently in deals and how effectively we convert against them."
+        title="Who's Hurting Us Most?"
+        insight="Select the red-marked competitor with high deal volume and low win rate — this is where we're losing most often."
       />
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
         <CompetitorTable data={competitorData} />
@@ -174,8 +177,8 @@ export default function Dashboard() {
       </div>
 
       <ExplainerCard
-        title="Products Most Frequently Targeted"
-        insight="Identify which of our product lines face the most competitive pressure to prioritize differentiation, enablement, and support."
+        title="Which Product Is Losing Us the Most Deals?"
+        insight="Select the most vulnerable product (AI extracted from calls) to uncover where we're losing."
       />
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
         <ProductDiscussionTable data={productData} />
@@ -183,34 +186,25 @@ export default function Dashboard() {
       </div>
 
       <ExplainerCard
-        title="Conversion Patterns Across the Funnel"
-        insight="Understand where in the sales journey we win or lose competitive deals to improve stage-specific strategy."
-      />
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
-        <StageTable data={stageData} />
-        <StageScatterPlot data={stageData} />
-      </div>
-
-      <ExplainerCard
-        title="Why We Lose to Competitors"
-        insight="Identify the most common reasons for lost deals to strengthen our positioning, messaging, and product roadmap."
+        title="What's the Most Damaging Objection?"
+        insight="Select the red-marked objection category with the highest loss impact to prioritize fixes and refine our competitive narrative."
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <ObjectionCategoryTable data={objectionData} />
         <ObjectionWordCloud data={objectionData} />
       </div>
-
-      <ExplainerCard
-        title="Competitor Positioning with Prospect"
-        insight="Assess how well competitors are known or adopted with our prospect to plan for displacement vs greenfield tactics."
-      />
-      <div className="grid grid-cols-1 gap-6 mb-8">
-        <TagPieChart data={transformToTagData(filteredData)} />
+      {/* Full-width objection handling table */}
+      <div className="mb-8">
+        <ExplainerCard
+          title="How Do We Tackle This Objection?"
+          insight="Deep dive into objections and best response recommendation to sharpen our objection handling playbook."
+        />
+        <ObjectionHandlingTable data={filteredData} />
       </div>
 
       <ExplainerCard
-        title="Rep Performance in Competitive Deals"
-        insight="Highlight which reps win despite objections and where coaching is needed to improve competitive outcomes."
+        title="Which Reps Need Coaching Now?"
+        insight="These reps have the lowest win rates on this objection — prioritize training and support here."
       />
       <div className="grid grid-cols-1 gap-6">
         <RepTable data={repData} />
@@ -218,8 +212,8 @@ export default function Dashboard() {
 
       <div className="mt-8">
         <ExplainerCard
-          title="Deal-Level Drill-Down: Calls, Stages & Outcomes"
-          insight="Deep dive into individual competitive deals to review call outcomes, deal stages, and key objections raised by prospects."
+          title="What Can We Learn From Specific Deals?"
+          insight="Explore deal-level insights to identify patterns, buyer concerns, and what’s tipping decisions against us."
         />
       </div>
       <RawDealsTable data={filteredData} />

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { CalendarRange } from "lucide-react";
+import { CalendarRange, X } from "lucide-react";
 import { format } from "date-fns";
 import { FilterOptions } from "@/types/dashboard";
 import { DateRange } from "react-day-picker";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,17 +27,23 @@ interface FilterBarProps {
   filterOptions: {
     productLines: string[];
     competitors: string[];
-    dealStages: string[];
-    stageBeforeLost: string[];
+    salesStages: string[];
+    products: string[];
+    objectionCategories: string[];
   };
   onFilterChange: (filters: FilterOptions) => void;
 }
+
+// Add this type for filter keys
+type FilterKey = keyof Omit<FilterOptions, 'dateRange'>;
 
 export default function FilterBar({ filters, filterOptions, onFilterChange }: FilterBarProps) {
   const [date, setDate] = useState<DateRange>({
     from: filters.dateRange.from,
     to: filters.dateRange.to,
   });
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleDateChange = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
@@ -48,39 +55,65 @@ export default function FilterBar({ filters, filterOptions, onFilterChange }: Fi
     }
   };
 
-  const handleSelectChange = (value: string, filterType: keyof Omit<FilterOptions, 'dateRange'>) => {
+  // Multi-select logic
+  const handleMultiSelectChange = (filterType: keyof Omit<FilterOptions, 'dateRange'>, value: string) => {
+    const currentValues = filters[filterType] as string[];
+    let newValues: string[];
     if (value === "All") {
-      onFilterChange({
-        ...filters,
-        [filterType]: ["All"],
-      });
+      newValues = ["All"];
     } else {
-      const currentValues = filters[filterType] as string[];
-      let newValues: string[];
-      
       if (currentValues.includes("All")) {
         newValues = [value];
+      } else if (currentValues.includes(value)) {
+        newValues = currentValues.filter(v => v !== value);
+        if (newValues.length === 0) newValues = ["All"];
       } else {
-        if (currentValues.includes(value)) {
-          newValues = currentValues.filter(v => v !== value);
-          if (newValues.length === 0) newValues = ["All"];
-        } else {
-          newValues = [...currentValues, value];
-        }
+        newValues = [...currentValues, value];
       }
-      
-      onFilterChange({
-        ...filters,
-        [filterType]: newValues,
-      });
     }
+    onFilterChange({
+      ...filters,
+      [filterType]: newValues,
+    });
   };
+
+  const handleChipRemove = (filterType: keyof Omit<FilterOptions, 'dateRange'>, value: string) => {
+    handleMultiSelectChange(filterType, value);
+  };
+
+  const filterConfigs: { key: FilterKey; label: string; options: string[] }[] = [
+    {
+      key: "productLine",
+      label: "Product Line (from CRM)",
+      options: filterOptions.productLines,
+    },
+    {
+      key: "salesStage",
+      label: "Deal Stage",
+      options: filterOptions.salesStages,
+    },
+    {
+      key: "competitor",
+      label: "Competitor",
+      options: filterOptions.competitors,
+    },
+    {
+      key: "product",
+      label: "Product (extracted from AI)",
+      options: filterOptions.products,
+    },
+    {
+      key: "objectionCategory",
+      label: "Objection Category",
+      options: filterOptions.objectionCategories,
+    },
+  ];
 
   return (
     <Card className="mb-6 border shadow-sm">
-      <div className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="p-4 grid grid-cols-1 md:grid-cols-6 gap-2">
         {/* Date Range Filter */}
-        <div className="space-y-2">
+        <div className="space-y-2 max-w-[180px]">
           <span className="text-sm font-medium text-gray-700">Date Range</span>
           <Popover>
             <PopoverTrigger asChild>
@@ -114,86 +147,62 @@ export default function FilterBar({ filters, filterOptions, onFilterChange }: Fi
             </PopoverContent>
           </Popover>
         </div>
-
-        {/* Product Line Filter */}
-        <div className="space-y-2">
-          <span className="text-sm font-medium text-gray-700">Product Line</span>
-          <Select
-            value={filters.productLine[0]}
-            onValueChange={(value) => handleSelectChange(value, "productLine")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select product line" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.productLines.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Competitor Filter */}
-        <div className="space-y-2">
-          <span className="text-sm font-medium text-gray-700">Competitor</span>
-          <Select
-            value={filters.competitor[0]}
-            onValueChange={(value) => handleSelectChange(value, "competitor")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select competitor" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.competitors.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Deal Stage Filter */}
-        <div className="space-y-2">
-          <span className="text-sm font-medium text-gray-700">Deal Stage</span>
-          <Select
-            value={filters.dealStage[0]}
-            onValueChange={(value) => handleSelectChange(value, "dealStage")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select deal stage" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.dealStages.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Stage Before Lost Filter */}
-        <div className="space-y-2">
-          <span className="text-sm font-medium text-gray-700">Stage Before Lost</span>
-          <Select
-            value={filters.stageBeforeLost[0]}
-            onValueChange={(value) => handleSelectChange(value, "stageBeforeLost")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select stage" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.stageBeforeLost.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Multi-select Filters */}
+        {filterConfigs.map(({ key, label, options }) => (
+          <div className="space-y-2 max-w-[180px]" key={key}>
+            <span className="text-sm font-medium text-gray-700">{label}</span>
+            <div className="relative">
+              <Button
+                variant="outline"
+                className="w-full flex flex-wrap gap-1 min-h-[40px] justify-start items-center text-left font-normal pr-8"
+                onClick={() => setOpenDropdown(openDropdown === key ? null : key)}
+                type="button"
+              >
+                {filters[key][0] === "All" ? (
+                  <span className="text-gray-500">All</span>
+                ) : filters[key].length === 1 ? (
+                  <span>{filters[key][0]}</span>
+                ) : (
+                  <span>{filters[key].length} selected</span>
+                )}
+              </Button>
+              {openDropdown === key && (
+                <div
+                  ref={el => (dropdownRefs.current[key] = el)}
+                  className="absolute left-0 top-full mt-2 z-50 bg-white border rounded shadow-lg p-3 min-w-[200px] max-h-72 overflow-y-auto"
+                >
+                  <div className="mb-2 font-semibold text-gray-700">Select {label}</div>
+                  <div className="flex flex-col gap-1">
+                    {options.map(option => (
+                      <label key={option} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filters[key].includes(option)}
+                          onChange={() => handleMultiSelectChange(key, option)}
+                        />
+                        <span className="truncate" title={option}>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {filters[key][0] !== "All" && (
+                    <button
+                      className="mt-3 px-3 py-1 bg-gray-200 rounded text-xs hover:bg-gray-300"
+                      onClick={e => {
+                        e.stopPropagation();
+                        onFilterChange({
+                          ...filters,
+                          [key]: ["All"],
+                        });
+                      }}
+                    >
+                      Clear Filter
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );

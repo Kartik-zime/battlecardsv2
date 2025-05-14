@@ -16,8 +16,9 @@ export interface FilterOptions {
   };
   productLine: string[];
   competitor: string[];
-  dealStage: string[];
-  stageBeforeLost: string[];
+  salesStage: string[];
+  product: string[];
+  objectionCategory: string[];
 }
 
 export interface StageData {
